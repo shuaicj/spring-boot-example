@@ -16,7 +16,7 @@
 
     <modules>
         <module>rest-common</module>
-        <module>rest-jar</module>
+        <module>rest-demo</module>
         <module>rest-war</module>
         <module>rest-security</module>
         <module>rest-predestroy</module>

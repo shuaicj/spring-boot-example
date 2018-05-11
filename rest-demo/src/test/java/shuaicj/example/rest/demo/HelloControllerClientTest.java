@@ -1,4 +1,4 @@
-package shuaicj.example.rest.jar;
+package shuaicj.example.rest.demo;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,14 +23,14 @@ public class HelloControllerClientTest {
     private TestRestTemplate rest;
 
     @Test
-    public void hello() throws Exception {
+    public void hello() {
         Hello h = rest.getForObject("/hello", Hello.class);
         assertThat(h.getId()).isEqualTo(1L);
         assertThat(h.getContent()).isEqualTo("Hello World!");
     }
 
     @Test
-    public void helloMe() throws Exception {
+    public void helloMe() {
         Hello h = rest.getForObject("/hello?name=Me", Hello.class);
         assertThat(h.getId()).isEqualTo(2L);
         assertThat(h.getContent()).isEqualTo("Hello Me!");

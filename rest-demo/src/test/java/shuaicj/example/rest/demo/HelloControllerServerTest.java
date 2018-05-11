@@ -1,4 +1,4 @@
-package shuaicj.example.rest.jar;
+package shuaicj.example.rest.demo;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
