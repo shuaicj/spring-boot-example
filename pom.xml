@@ -17,6 +17,7 @@
     <modules>
         <module>rest-common</module>
         <module>rest-demo</module>
+        <module>rest-error-handling</module>
         <module>rest-war</module>
         <module>rest-security</module>
         <module>rest-predestroy</module>
