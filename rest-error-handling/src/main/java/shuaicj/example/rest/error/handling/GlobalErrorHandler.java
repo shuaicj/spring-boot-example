@@ -1,10 +1,11 @@
 package shuaicj.example.rest.error.handling;
 
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
@@ -15,21 +16,28 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ControllerAdvice
 public class GlobalErrorHandler {
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler
+    @ResponseBody
+    public Error globalScopeErrorHandler(HelloNotFoundException e) {
+        return new Error(e);
+    }
+
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Error controllerScopeErrorHandler(MethodArgumentNotValidException e) {
+    @ExceptionHandler
+    @ResponseBody
+    public Error globalScopeErrorHandler(MethodArgumentNotValidException e) {
         return new Error(e);
     }
 
-    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
-    public Error globalScopeErrorHandler(HttpRequestMethodNotSupportedException e) {
-        return new Error(e);
-    }
-
-    @ExceptionHandler(Exception.class)
+    // a general exception handler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Error globalScopeErrorHandler(Exception e) {
+    @ExceptionHandler
+    @ResponseBody
+    public Error globalScopeErrorHandler(Exception e) throws Exception {
+        if (AnnotationUtils.findAnnotation(e.getClass(), ResponseStatus.class) != null) {
+            throw e;
+        }
         return new Error(e);
     }
 }
