@@ -9,6 +9,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import shuaicj.example.rest.common.Hello;
+import shuaicj.example.rest.common.err.Err;
+import shuaicj.example.rest.common.err.NotFoundException;
 
 import java.util.Date;
 
@@ -28,23 +31,23 @@ public class ErrorHandlingTest {
 
     @Test
     public void ok() {
-        ResponseEntity<String> e = rest.postForEntity("/hello", new Hello(50, "abc"), String.class);
+        ResponseEntity<String> e = rest.postForEntity("/hello-err", new Hello(50, "abc"), String.class);
         assertThat(e.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(e.getBody()).isEqualTo("ok");
     }
 
     @Test
     public void notFound() {
-        ResponseEntity<Error> e = rest.postForEntity("/hello", new Hello(101, "abc"), Error.class);
+        ResponseEntity<Err> e = rest.postForEntity("/hello-err", new Hello(101, "abc"), Err.class);
         assertThat(e.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-        assertThat(e.getBody().getException()).isEqualTo(HelloNotFoundException.class.getName());
+        assertThat(e.getBody().getException()).isEqualTo(NotFoundException.class.getName());
         assertThat(e.getBody().getMessage()).isEqualTo("id not found [controller scope]");
         assertThat(e.getBody().getTimestamp()).isBeforeOrEqualsTo(new Date());
     }
 
     @Test
     public void jsonValidationFailed() {
-        ResponseEntity<Error> e = rest.postForEntity("/hello", new Hello(50, null), Error.class);
+        ResponseEntity<Err> e = rest.postForEntity("/hello-err", new Hello(50, null), Err.class);
         assertThat(e.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(e.getBody().getException()).isEqualTo(MethodArgumentNotValidException.class.getName());
         assertThat(e.getBody().getMessage()).contains("NotNull");
@@ -53,7 +56,7 @@ public class ErrorHandlingTest {
 
     @Test
     public void unexpected() {
-        ResponseEntity<Error> e = rest.postForEntity("/hello", new Hello(-1, "abc"), Error.class);
+        ResponseEntity<Err> e = rest.postForEntity("/hello-err", new Hello(-1, "abc"), Err.class);
         assertThat(e.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
         assertThat(e.getBody().getException()).isEqualTo(RuntimeException.class.getName());
         assertThat(e.getBody().getMessage()).isEqualTo("unexpected error");

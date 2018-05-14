@@ -1,0 +1,8 @@
+# base path of message files in src/main/resources
+spring.messages.basename: i18n/messages
+
+# don't fallback to system locale, and use messages.properties instead
+spring.messages.fallback-to-system-locale: false
+
+# ignore null fields in serialization
+spring.jackson.default-property-inclusion: non_null

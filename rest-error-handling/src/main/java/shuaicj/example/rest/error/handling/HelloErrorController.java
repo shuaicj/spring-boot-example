@@ -6,6 +6,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import shuaicj.example.rest.common.Hello;
+import shuaicj.example.rest.common.err.Err;
+import shuaicj.example.rest.common.err.NotFoundException;
 
 import javax.validation.Valid;
 
@@ -15,27 +18,27 @@ import javax.validation.Valid;
  * @author shuaicj 2018/05/11
  */
 @RestController
-public class HelloController {
+public class HelloErrorController {
 
-    @PostMapping("/hello")
+    @PostMapping("/hello-err")
     public String post(@Valid @RequestBody Hello h) {
         long id = h.getId();
         if (id < 0) {
             throw new RuntimeException("unexpected error");
         } else if (id > 100) {
-            throw new HelloNotFoundException("id not found");
+            throw new NotFoundException("id not found");
         }
         return "ok";
     }
 
     /**
      * This controller-scoped handler is prior to the global one
-     * {@link GlobalErrorHandler#globalScopeErrorHandler(HelloNotFoundException)}.
+     * {@link GlobalErrorHandler#globalScopeErrorHandler(NotFoundException)}.
      */
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public Error controllerScopeErrorHandler(HelloNotFoundException e) {
-        Error err = new Error(e);
+    public Err controllerScopeErrorHandler(NotFoundException e) {
+        Err err = new Err(e);
         err.setMessage(err.getMessage() + " [controller scope]");
         return err;
     }

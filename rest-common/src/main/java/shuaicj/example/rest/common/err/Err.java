@@ -1,4 +1,4 @@
-package shuaicj.example.rest.error.handling;
+package shuaicj.example.rest.common.err;
 
 import java.util.Date;
 
@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
  *
  * @author shuaicj 2018/05/11
  */
-public class Error {
+public class Err {
 
     private String exception;
     private String message;
@@ -17,12 +17,20 @@ public class Error {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss.SSS")
     private Date timestamp;
 
-    public Error() {}
+    public Err() {
+        this.timestamp = new Date();
+    }
 
-    public Error(Throwable e) {
+    public Err(String exception, String message) {
+        this();
+        this.exception = exception;
+        this.message = message;
+    }
+
+    public Err(Throwable e) {
+        this();
         this.exception = e.getClass().getName();
         this.message = e.getMessage();
-        this.timestamp = new Date();
     }
 
     public String getException() {

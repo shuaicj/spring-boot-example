@@ -1,5 +1,7 @@
 package shuaicj.example.rest.common;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * A java bean representing a greeting.
  *
@@ -8,6 +10,8 @@ package shuaicj.example.rest.common;
 public class Hello {
 
     private long id;
+
+    @NotNull
     private String content;
 
     public Hello() {}

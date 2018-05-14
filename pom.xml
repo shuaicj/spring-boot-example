@@ -21,6 +21,7 @@
         <module>rest-war</module>
         <module>rest-security</module>
         <module>rest-predestroy</module>
+        <module>rest-i18n</module>
     </modules>
 
     <properties>
@@ -32,6 +33,11 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>shuaicj.example.rest</groupId>
+                <artifactId>rest-common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <dependency>
                 <groupId>io.jsonwebtoken</groupId>
                 <artifactId>jjwt</artifactId>
