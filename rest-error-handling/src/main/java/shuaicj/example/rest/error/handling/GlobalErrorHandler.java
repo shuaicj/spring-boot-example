@@ -1,5 +1,7 @@
 package shuaicj.example.rest.error.handling;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -17,6 +19,8 @@ import shuaicj.example.rest.common.err.NotFoundException;
  */
 @ControllerAdvice
 public class GlobalErrorHandler {
+
+    private static final Logger logger = LoggerFactory.getLogger(GlobalErrorHandler.class);
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler
@@ -40,6 +44,7 @@ public class GlobalErrorHandler {
         if (AnnotationUtils.findAnnotation(e.getClass(), ResponseStatus.class) != null) {
             throw e;
         }
+        logger.warn("unexpected exception", e);
         return new Err(e);
     }
 }

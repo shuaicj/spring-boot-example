@@ -2,6 +2,8 @@ package shuaicj.example.rest.i18n;
 
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpStatus;
@@ -21,6 +23,7 @@ import shuaicj.example.rest.common.err.NotFoundException;
 @ControllerAdvice
 public class GlobalErrorHandler {
 
+    private static final Logger logger = LoggerFactory.getLogger(GlobalErrorHandler.class);
     @Autowired I18nHelper i18n;
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
@@ -37,7 +40,14 @@ public class GlobalErrorHandler {
         String message = e.getBindingResult()
                           .getAllErrors()
                           .stream()
-                          .map(objectError -> i18n.get(objectError))
+                          .map(objectError -> {
+                              String msg = objectError.getDefaultMessage();
+                              if (msg != null && msg.startsWith("{") && msg.endsWith("}")) {
+                                  String code = msg.substring(1, msg.length() - 1);
+                                  return i18n.get(code, objectError.getArguments());
+                              }
+                              return i18n.get(objectError);
+                          })
                           .collect(Collectors.joining("; "));
         return new Err(e.getClass().getName(), message);
     }
@@ -50,6 +60,7 @@ public class GlobalErrorHandler {
         if (AnnotationUtils.findAnnotation(e.getClass(), ResponseStatus.class) != null) {
             throw e;
         }
+        logger.warn("unexpected exception", e);
         return new Err(e.getClass().getName(), i18n.get("Exception.unexpected"));
     }
 }

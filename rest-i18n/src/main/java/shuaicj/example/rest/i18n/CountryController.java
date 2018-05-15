@@ -26,10 +26,10 @@ public class CountryController {
 
     @PostMapping("/countries")
     public String post(@Valid @RequestBody Country country) {
-        String code = country.getCode();
-        if (code.equals("xxx")) {
+        String id = country.getId();
+        if (id.equals("xxx")) {
             throw new RuntimeException();
-        } else if (code.equals("yyy")) {
+        } else if (id.equals("yyy")) {
             throw new NotFoundException("yyy");
         }
         return "ok";

@@ -33,24 +33,25 @@ public class ValidationMessageTest {
 
     @Test
     public void ok() {
-        ResponseEntity<String> e = rest.postForEntity("/countries", new Country("en-US", "abc"), String.class);
+        ResponseEntity<String> e = rest.postForEntity("/countries",
+                new Country("id", "name", "capital"), String.class);
         assertThat(e.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(e.getBody()).isEqualTo("ok");
     }
 
     @Test
     public void notFound() {
-        Country country = new Country("yyy", "abc");
+        Country country = new Country("yyy", "name", "capital");
         HttpStatus status = HttpStatus.NOT_FOUND;
         String exception = NotFoundException.class.getName();
-        check(country, status, exception, null, "country code yyy not found");
-        check(country, status, exception, "zh-CN", "找不到国家代号yyy");
-        check(country, status, exception, "fr-FR", "country code yyy not found");
+        check(country, status, exception, null, "yyy not found");
+        check(country, status, exception, "zh-CN", "找不到yyy");
+        check(country, status, exception, "fr-FR", "yyy not found");
     }
 
     @Test
     public void unexpected() {
-        Country country = new Country("xxx", "abc");
+        Country country = new Country("xxx", "name", "capital");
         HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
         String exception = RuntimeException.class.getName();
         check(country, status, exception, null, "unexpected exception");
@@ -59,33 +60,79 @@ public class ValidationMessageTest {
     }
 
     @Test
-    public void notNull() {
-        Country country = new Country(null, "abc");
+    public void idNotNull() {
+        Country country = new Country(null, "name", "capital");
         HttpStatus status = HttpStatus.BAD_REQUEST;
         String exception = MethodArgumentNotValidException.class.getName();
-        check(country, status, exception, null, "country code is required");
+        check(country, status, exception, null, "country id is required");
         check(country, status, exception, "zh-CN", "请指定国家代号");
-        check(country, status, exception, "fr-FR", "country code is required");
+        check(country, status, exception, "fr-FR", "country id is required");
     }
 
     @Test
-    public void badSize() {
-        Country country = new Country("zhzhzh", "abc");
+    public void nameNotNull() {
+        Country country = new Country("id", null, "capital");
         HttpStatus status = HttpStatus.BAD_REQUEST;
         String exception = MethodArgumentNotValidException.class.getName();
-        check(country, status, exception, null, "the length of country code is between 2 and 5");
+        check(country, status, exception, null, "country name is required");
+        check(country, status, exception, "zh-CN", "请指定国家名称");
+        check(country, status, exception, "fr-FR", "country name is required");
+    }
+
+    @Test
+    public void capitalNotNull() {
+        Country country = new Country("id", "name", null);
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        String exception = MethodArgumentNotValidException.class.getName();
+        check(country, status, exception, null, "country capital is required");
+        check(country, status, exception, "zh-CN", "country capital is required");
+        check(country, status, exception, "fr-FR", "country capital is required");
+    }
+
+    @Test
+    public void idBadSize() {
+        Country country = new Country("i", "name", "capital");
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        String exception = MethodArgumentNotValidException.class.getName();
+        check(country, status, exception, null, "the length of country id is between 2 and 5");
         check(country, status, exception, "zh-CN", "国家代号长度应在2到5之间");
-        check(country, status, exception, "fr-FR", "the length of country code is between 2 and 5");
+        check(country, status, exception, "fr-FR", "the length of country id is between 2 and 5");
+    }
+
+    @Test
+    public void nameBadSize() {
+        Country country = new Country("id", "n", "capital");
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        String exception = MethodArgumentNotValidException.class.getName();
+        check(country, status, exception, null, "the length of country name is between 2 and 10");
+        check(country, status, exception, "zh-CN", "国家名称长度应在2到10之间");
+        check(country, status, exception, "fr-FR", "the length of country name is between 2 and 10");
+    }
+
+    @Test
+    public void capitalBadSize() {
+        Country country = new Country("id", "name", "c");
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        String exception = MethodArgumentNotValidException.class.getName();
+        check(country, status, exception, null, "the length of country capital is between 2 and 20");
+        check(country, status, exception, "zh-CN", "the length of country capital is between 2 and 20");
+        check(country, status, exception, "fr-FR", "the length of country capital is between 2 and 20");
     }
 
     @Test
     public void notNullAndBadSize() {
-        Country country = new Country("zhzhzh", null);
+        Country country = new Country("zhzhzh", null, null);
         HttpStatus status = HttpStatus.BAD_REQUEST;
         String exception = MethodArgumentNotValidException.class.getName();
-        check(country, status, exception, null, "the length of country code is between 2 and 5", "country name is required");
-        check(country, status, exception, "zh-CN", "国家代号长度应在2到5之间", "请指定国家名称");
-        check(country, status, exception, "fr-FR", "the length of country code is between 2 and 5", "country name is required");
+        check(country, status, exception, null, "the length of country id is between 2 and 5",
+                                                "country name is required",
+                                                "country capital is required");
+        check(country, status, exception, "zh-CN", "国家代号长度应在2到5之间",
+                                                   "请指定国家名称",
+                                                   "country capital is required");
+        check(country, status, exception, "fr-FR", "the length of country id is between 2 and 5",
+                                                   "country name is required",
+                                                   "country capital is required");
     }
 
     private void check(Country country, HttpStatus status, String exception, String locale, String... messages) {

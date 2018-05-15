@@ -24,6 +24,10 @@ public class I18nHelper {
         return messageSource.getMessage(code, args, LocaleContextHolder.getLocale());
     }
 
+    public String get(String code, Object[] args, String defaultMessage) {
+        return messageSource.getMessage(code, args, defaultMessage, LocaleContextHolder.getLocale());
+    }
+
     public String get(MessageSourceResolvable resolvable) {
         return messageSource.getMessage(resolvable, LocaleContextHolder.getLocale());
     }
