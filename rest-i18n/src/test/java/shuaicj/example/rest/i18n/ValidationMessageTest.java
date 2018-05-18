@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import shuaicj.example.rest.common.err.Err;
 import shuaicj.example.rest.common.err.NotFoundException;
 
@@ -33,20 +34,30 @@ public class ValidationMessageTest {
 
     @Test
     public void ok() {
-        ResponseEntity<String> e = rest.postForEntity("/countries",
-                new Country("id", "name", "capital"), String.class);
+        ResponseEntity<String> e = rest.exchange("/countries/1", HttpMethod.PUT,
+                new HttpEntity<>(new Country("cn", "name", "capital")), String.class);
         assertThat(e.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(e.getBody()).isEqualTo("ok");
     }
 
     @Test
     public void notFound() {
-        Country country = new Country("yyy", "name", "capital");
+        Country country = new Country("cn", "name", "capital");
         HttpStatus status = HttpStatus.NOT_FOUND;
         String exception = NotFoundException.class.getName();
-        check(country, status, exception, null, "yyy not found");
-        check(country, status, exception, "zh-CN", "找不到yyy");
-        check(country, status, exception, "fr-FR", "yyy not found");
+        check("-1", country, status, exception, null, "id -1 not found");
+        check("-1", country, status, exception, "zh-CN", "找不到id -1");
+        check("-1", country, status, exception, "fr-FR", "id -1 not found");
+    }
+
+    @Test
+    public void typeMismatch() {
+        Country country = new Country("cn", "name", "capital");
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        String exception = MethodArgumentTypeMismatchException.class.getName();
+        check("abc", country, status, exception, null, "id type mismatch");
+        check("abc", country, status, exception, "zh-CN", "id类型不匹配");
+        check("abc", country, status, exception, "fr-FR", "id type mismatch");
     }
 
     @Test
@@ -60,18 +71,18 @@ public class ValidationMessageTest {
     }
 
     @Test
-    public void idNotNull() {
+    public void abbrNotNull() {
         Country country = new Country(null, "name", "capital");
         HttpStatus status = HttpStatus.BAD_REQUEST;
         String exception = MethodArgumentNotValidException.class.getName();
-        check(country, status, exception, null, "country id is required");
+        check(country, status, exception, null, "country abbr is required");
         check(country, status, exception, "zh-CN", "请指定国家代号");
-        check(country, status, exception, "fr-FR", "country id is required");
+        check(country, status, exception, "fr-FR", "country abbr is required");
     }
 
     @Test
     public void nameNotNull() {
-        Country country = new Country("id", null, "capital");
+        Country country = new Country("cn", null, "capital");
         HttpStatus status = HttpStatus.BAD_REQUEST;
         String exception = MethodArgumentNotValidException.class.getName();
         check(country, status, exception, null, "country name is required");
@@ -81,7 +92,7 @@ public class ValidationMessageTest {
 
     @Test
     public void capitalNotNull() {
-        Country country = new Country("id", "name", null);
+        Country country = new Country("cn", "name", null);
         HttpStatus status = HttpStatus.BAD_REQUEST;
         String exception = MethodArgumentNotValidException.class.getName();
         check(country, status, exception, null, "country capital is required");
@@ -90,18 +101,18 @@ public class ValidationMessageTest {
     }
 
     @Test
-    public void idBadSize() {
+    public void abbrBadSize() {
         Country country = new Country("i", "name", "capital");
         HttpStatus status = HttpStatus.BAD_REQUEST;
         String exception = MethodArgumentNotValidException.class.getName();
-        check(country, status, exception, null, "the length of country id is between 2 and 5");
-        check(country, status, exception, "zh-CN", "国家代号长度应在2到5之间");
-        check(country, status, exception, "fr-FR", "the length of country id is between 2 and 5");
+        check(country, status, exception, null, "the length of country abbr is between 2 and 3");
+        check(country, status, exception, "zh-CN", "国家代号长度应在2到3之间");
+        check(country, status, exception, "fr-FR", "the length of country abbr is between 2 and 3");
     }
 
     @Test
     public void nameBadSize() {
-        Country country = new Country("id", "n", "capital");
+        Country country = new Country("cn", "n", "capital");
         HttpStatus status = HttpStatus.BAD_REQUEST;
         String exception = MethodArgumentNotValidException.class.getName();
         check(country, status, exception, null, "the length of country name is between 2 and 10");
@@ -111,7 +122,7 @@ public class ValidationMessageTest {
 
     @Test
     public void capitalBadSize() {
-        Country country = new Country("id", "name", "c");
+        Country country = new Country("cn", "name", "c");
         HttpStatus status = HttpStatus.BAD_REQUEST;
         String exception = MethodArgumentNotValidException.class.getName();
         check(country, status, exception, null, "the length of country capital is between 2 and 20");
@@ -124,26 +135,30 @@ public class ValidationMessageTest {
         Country country = new Country("zhzhzh", null, null);
         HttpStatus status = HttpStatus.BAD_REQUEST;
         String exception = MethodArgumentNotValidException.class.getName();
-        check(country, status, exception, null, "the length of country id is between 2 and 5",
+        check(country, status, exception, null, "the length of country abbr is between 2 and 3",
                                                 "country name is required",
                                                 "country capital is required");
-        check(country, status, exception, "zh-CN", "国家代号长度应在2到5之间",
+        check(country, status, exception, "zh-CN", "国家代号长度应在2到3之间",
                                                    "请指定国家名称",
                                                    "country capital is required");
-        check(country, status, exception, "fr-FR", "the length of country id is between 2 and 5",
+        check(country, status, exception, "fr-FR", "the length of country abbr is between 2 and 3",
                                                    "country name is required",
                                                    "country capital is required");
     }
 
-    private void check(Country country, HttpStatus status, String exception, String locale, String... messages) {
-        ResponseEntity<Err> e;
-        if (locale == null) {
-            e = rest.postForEntity("/countries", country, Err.class);
-        } else {
-            HttpHeaders headers = new HttpHeaders();
+    private void check(Country country, HttpStatus status, String exception,
+                       String locale, String... messages) {
+        check("1", country, status, exception, locale, messages);
+    }
+
+    private void check(String id, Country country, HttpStatus status, String exception,
+                       String locale, String... messages) {
+        HttpHeaders headers = new HttpHeaders();
+        if (locale != null) {
             headers.set(HttpHeaders.ACCEPT_LANGUAGE, locale);
-            e = rest.exchange("/countries", HttpMethod.POST, new HttpEntity<>(country, headers), Err.class);
         }
+        ResponseEntity<Err> e = rest.exchange("/countries/" + id, HttpMethod.PUT,
+                new HttpEntity<>(country, headers), Err.class);
         assertThat(e.getStatusCode()).isEqualTo(status);
         assertThat(e.getBody().getException()).isEqualTo(exception);
         assertThat(e.getBody().getTimestamp()).isBeforeOrEqualsTo(new Date());

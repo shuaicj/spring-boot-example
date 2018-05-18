@@ -4,7 +4,8 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import shuaicj.example.rest.common.err.NotFoundException;
@@ -24,13 +25,18 @@ public class CountryController {
         return i18n.get("shuaicj.country");
     }
 
-    @PostMapping("/countries")
-    public String post(@Valid @RequestBody Country country) {
-        String id = country.getId();
-        if (id.equals("xxx")) {
+    @GetMapping("/countries/cn/cities/{cityId}")
+    public String getCity() {
+        return null;
+    }
+
+    @PutMapping("/countries/{id}")
+    public String put(@PathVariable long id, @Valid @RequestBody Country country) {
+        if (id < 0) {
+            throw new NotFoundException("id " + id);
+        }
+        if (country.getAbbr().equals("xxx")) {
             throw new RuntimeException();
-        } else if (id.equals("yyy")) {
-            throw new NotFoundException("yyy");
         }
         return "ok";
     }

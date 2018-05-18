@@ -5,4 +5,7 @@ spring.messages.basename: i18n/messages
 spring.messages.fallback-to-system-locale: false
 
 # ignore null fields in serialization
-spring.jackson.default-property-inclusion: non_null
+spring.jackson.default-property-inclusion: NON_NULL
+
+# property name mapping to, e.g. country_name
+#spring.jackson.property-naming-strategy: SNAKE_CASE
