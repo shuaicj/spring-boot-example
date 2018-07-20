@@ -5,10 +5,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import shuaicj.example.rest.common.err.Err;
 import shuaicj.example.rest.common.err.NotFoundException;
 
@@ -17,21 +16,19 @@ import shuaicj.example.rest.common.err.NotFoundException;
  *
  * @author shuaicj 2018/05/11
  */
-@ControllerAdvice
+@RestControllerAdvice
 public class GlobalErrorHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(GlobalErrorHandler.class);
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler
-    @ResponseBody
     public Err globalScopeErrorHandler(NotFoundException e) {
         return new Err(e);
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler
-    @ResponseBody
     public Err globalScopeErrorHandler(MethodArgumentNotValidException e) {
         return new Err(e);
     }
@@ -39,7 +36,6 @@ public class GlobalErrorHandler {
     // a general exception handler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler
-    @ResponseBody
     public Err globalScopeErrorHandler(Exception e) throws Exception {
         if (AnnotationUtils.findAnnotation(e.getClass(), ResponseStatus.class) != null) {
             throw e;

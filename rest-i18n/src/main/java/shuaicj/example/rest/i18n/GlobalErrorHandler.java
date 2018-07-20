@@ -9,10 +9,9 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import shuaicj.example.rest.common.err.Err;
 import shuaicj.example.rest.common.err.NotFoundException;
@@ -22,7 +21,7 @@ import shuaicj.example.rest.common.err.NotFoundException;
  *
  * @author shuaicj 2018/05/14
  */
-@ControllerAdvice
+@RestControllerAdvice
 public class GlobalErrorHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(GlobalErrorHandler.class);
@@ -31,28 +30,24 @@ public class GlobalErrorHandler {
 
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ExceptionHandler
-    @ResponseBody
     public Err globalScopeErrorHandler(NotFoundException e) {
         return new Err(e.getClass().getName(), i18n.get("Exception.notFound", new Object[]{e.getMessage()}));
     }
 
     @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
     @ExceptionHandler
-    @ResponseBody
     public Err globalScopeErrorHandler(HttpRequestMethodNotSupportedException e) {
         return new Err(e.getClass().getName(), i18n.get("Exception.method.notAllowed", new Object[]{e.getMethod()}));
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler
-    @ResponseBody
     public Err globalScopeErrorHandler(MethodArgumentTypeMismatchException e) {
         return new Err(e.getClass().getName(), i18n.get("Exception.type.mismatch", new Object[]{e.getName()}));
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler
-    @ResponseBody
     public Err globalScopeErrorHandler(MethodArgumentNotValidException e) {
         String message = e.getBindingResult()
                           .getAllErrors()
@@ -72,7 +67,6 @@ public class GlobalErrorHandler {
     // a general exception handler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler
-    @ResponseBody
     public Err globalScopeErrorHandler(Exception e) throws Exception {
         if (AnnotationUtils.findAnnotation(e.getClass(), ResponseStatus.class) != null) {
             throw e;
