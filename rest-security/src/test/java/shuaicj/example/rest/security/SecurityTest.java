@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import shuaicj.example.rest.security.config.JwtAuthenticationConfig;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
@@ -28,6 +29,9 @@ public class SecurityTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private JwtAuthenticationConfig jwtConfig;
 
     @Test
     @WithMockUser(username = "admin", roles = {"ADMIN", "USER"})
@@ -70,7 +74,7 @@ public class SecurityTest {
 
     @Test
     public void accessByTokenAsUser() throws Exception {
-        String token = mockMvc.perform(post("/auth")
+        String token = mockMvc.perform(post(jwtConfig.getUrl())
                 .content("{\"username\":\"shuaicj\",\"password\":\"shuaicj\"}"))
                 .andExpect(status().isOk()).andReturn().getResponse().getHeader("Authorization");
         mockMvc.perform(get("/hello").header("Authorization", token))
@@ -86,7 +90,7 @@ public class SecurityTest {
 
     @Test
     public void accessByTokenAsAdmin() throws Exception {
-        String token = mockMvc.perform(post("/auth")
+        String token = mockMvc.perform(post(jwtConfig.getUrl())
                 .content("{\"username\":\"admin\",\"password\":\"admin\"}"))
                 .andExpect(status().isOk()).andReturn().getResponse().getHeader("Authorization");
         mockMvc.perform(get("/hello").header("Authorization", token))

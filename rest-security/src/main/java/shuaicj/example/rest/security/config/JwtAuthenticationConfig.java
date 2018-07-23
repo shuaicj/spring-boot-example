@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 @ToString
 public class JwtAuthenticationConfig {
 
-    @Value("${shuaicj.security.jwt.url:/auth}")
+    @Value("${shuaicj.security.jwt.url:/login}")
     private String url;
 
     @Value("${shuaicj.security.jwt.header:Authorization}")
