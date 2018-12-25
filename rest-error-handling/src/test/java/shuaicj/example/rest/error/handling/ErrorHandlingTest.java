@@ -14,6 +14,7 @@ import shuaicj.example.rest.common.err.Err;
 import shuaicj.example.rest.common.err.NotFoundException;
 
 import java.util.Date;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,6 +35,22 @@ public class ErrorHandlingTest {
         ResponseEntity<String> e = rest.postForEntity("/hello-err", new Hello(50, "abc"), String.class);
         assertThat(e.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(e.getBody()).isEqualTo("ok");
+    }
+
+    @Test
+    public void illegalArgument() {
+        ResponseEntity<Map> e = rest.postForEntity("/hello-err", new Hello(0, "abc"), Map.class);
+        assertThat(e.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(e.getBody().get("exception")).isEqualTo(IllegalArgumentException.class.getName());
+        assertThat(e.getBody().get("message")).isEqualTo("illegal 0");
+    }
+
+    @Test
+    public void helloException() {
+        ResponseEntity<Map> e = rest.postForEntity("/hello-err", new Hello(1, "abc"), Map.class);
+        assertThat(e.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(e.getBody().get("exception")).isEqualTo(HelloErrorController.HelloException.class.getName());
+        assertThat(e.getBody().get("message")).isEqualTo("hello 1");
     }
 
     @Test

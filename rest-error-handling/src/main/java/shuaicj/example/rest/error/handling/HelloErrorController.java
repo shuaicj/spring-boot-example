@@ -10,6 +10,7 @@ import shuaicj.example.rest.common.Hello;
 import shuaicj.example.rest.common.err.Err;
 import shuaicj.example.rest.common.err.NotFoundException;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 /**
@@ -25,6 +26,10 @@ public class HelloErrorController {
         long id = h.getId();
         if (id < 0) {
             throw new RuntimeException("unexpected error");
+        } else if (id == 0) {
+            throw new IllegalArgumentException("illegal 0");
+        } else if (id == 1) {
+            throw new HelloException("hello 1");
         } else if (id > 100) {
             throw new NotFoundException("id not found");
         }
@@ -32,6 +37,21 @@ public class HelloErrorController {
     }
 
     /**
+     * Reuse spring-boot error response body, but changing http status only.
+     * This is the first way to do it.
+     * See also {@link GlobalErrorHandler#globalScopeErrorHandler(IllegalArgumentException, HttpServletResponse)}.
+     */
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @SuppressWarnings("serial")
+    public static class HelloException extends RuntimeException {
+
+        public HelloException(String message) {
+            super(message);
+        }
+    }
+
+    /**
+     * Custom error response body.
      * This controller-scoped handler is prior to the global one
      * {@link GlobalErrorHandler#globalScopeErrorHandler(NotFoundException)}.
      */
